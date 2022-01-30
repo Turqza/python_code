@@ -8,12 +8,11 @@ from sqlalchemy import create_engine
 from sqlalchemy import Column, Integer, String, DateTime
 from datetime import datetime
 
-#URL MUSEOS
 URL_MUSEOS = 'https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/4207def0-2ff7-41d5-9095-d42ae8207a5d/download/museos.csv'
 
-URL_CINES = 'https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/4207def0-2ff7-41d5-9095-d42ae8207a5d/download/museos.csv'
+URL_CINES = 'https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/392ce1a8-ef11-4776-b280-6f1c7fae16ae/download/cine.csv'
 
-URL_BIBLIOTECAS = 'https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/4207def0-2ff7-41d5-9095-d42ae8207a5d/download/museos.csv'
+URL_BIBLIOTECAS = 'https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/01c6c048-dbeb-44e0-8efa-6944f73715d7/download/biblioteca_popular.csv'
 
 # DECLARACIONES DE VARIABLES PARA USO DE BASE DE DATOS
 Base = declarative_base()
@@ -43,12 +42,11 @@ class EspaciosPublicos(Base):
 class ResumenCines(Base):
 	__tablename__ = 'resumen_cines'
 	id_cine = Column(Integer(), primary_key=True)
+	provincia = Column(String(50), nullable=True, unique=False)
 	cantidad_pantallas = Column(Integer(), nullable=True, unique=False)
 	cantidad_butacas = Column(Integer(), nullable=True, unique=False)
 	cantidad_de_espacios_incaa = Column(Integer(), nullable=True, unique=False)
 	created_at = Column(DateTime(), default=datetime.now())
-	
-	#inconsistencia de datos del arch defines
 
 def __str__(self):
 	return self.username
@@ -71,6 +69,7 @@ def normalize(s):
         ("\\xc2\\xa0", ""),
         ("\\xc3\\x89", "e"),
         ("\\xc2\\xb0", "°"),
+        ("\\r", ""),
         
     )
     for a, b in replacements:
@@ -106,12 +105,20 @@ def Iiterate_Spaces(URL_SPACES, session, record_type_name):
 				cod_localidad = id_departamentoList[1]
 				#SI EL TAMAÑO DE LA LISTA DE CAMPOS ES MAYOR QUE UN MINIMO ENTONCES CREO UN OBJETO ESPACIO PUBLICO CON SUS VALORES CORRESPONDIENTES
 				if len(list_fields) > 22:
+
+
+
+					if record_type_name == 'CINES':
+						provincia_item = list_fields[5]
+					else:
+						provincia_item = list_fields[6]
+
 					space1 = EspaciosPublicos(cod_localidad=cod_localidad, 
 												id_provincia=list_fields[1], 
 												id_departamento=list_fields[2],
 												categoria = normalize(list_fields[4]),
 												record_type = record_type_name,
-												provincia = normalize(list_fields[6]),
+												provincia = normalize(provincia_item),
 												localidad = normalize(list_fields[7]),
 												nombre = normalize(list_fields[9]),
 												codigo_postal = normalize(list_fields[11]) ,
@@ -121,12 +128,40 @@ def Iiterate_Spaces(URL_SPACES, session, record_type_name):
 												fuente = normalize(list_fields[21])
 												)
 					session.add(space1)
+					cine_len = len(list_fields)
+					if record_type_name == 'CINES' and cine_len > 25:
+						index1 = cine_len-4
+						index2 = cine_len-3
+						index3 = cine_len-2
+						print('1=>' + list_fields[index1])
+						print('2=>' + list_fields[index2])
+						print('3=>' + list_fields[index3])
+						if list_fields[index1] != '':
+							cantidad_pantallas_item = list_fields[index1]
+						else:
+							cantidad_pantallas_item = 0
+						
+						if list_fields[index2] != '':
+							cantidad_butacas_item = list_fields[index2]
+						else:
+							cantidad_butacas_item = 0
+						
+						if list_fields[index3] != 'si' and list_fields[index3] != 'SI':
+							cantidad_de_espacios_incaa_item = 1
+						else :
+							cantidad_de_espacios_incaa_item = 0
+						resumen_cines = ResumenCines( provincia=normalize(list_fields[5]),
+							cantidad_pantallas=cantidad_pantallas_item,
+							cantidad_butacas=cantidad_butacas_item,
+							cantidad_de_espacios_incaa=cantidad_de_espacios_incaa_item
+							)
+						session.add(resumen_cines)
 			#SI ES LA PRIMERA LINEA
 			else:
 				linenumber += 1
-		
+
 Iiterate_Spaces(URL_MUSEOS, session,'MUSEOS')
-Iiterate_Spaces(URL_CINES, session, 'CINES') 
+Iiterate_Spaces(URL_CINES, session, 'CINES')
 Iiterate_Spaces(URL_BIBLIOTECAS, session, 'BIBLIOTECAS')
 
 session.commit()
@@ -136,3 +171,7 @@ session.commit()
 #select categoria, count(id_space) from espacios_publicos group by categoria
 #select fuente, count(id_space) from espacios_publicos group by fuente
 #select provincia, count(id_space) from espacios_publicos group by provincia
+
+#select provincia, count( cantidad_pantallas ) from resumen_cines group by provincia
+#select provincia, count( cantidad_butacas ) from resumen_cines group by provincia
+#select provincia, count( cantidad_de_espacios_incaa ) from resumen_cines group by provincia
