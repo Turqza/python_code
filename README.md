@@ -32,11 +32,13 @@ o número de teléfono
 o mail
 o web
 
-# PARA OBTENER DATOS ADICIONALES COMO ESTOS:
+#PARA OBTENER DATOS ADICIOANLES COMO ESTOS:
 
-o Cantidad de registros totales por categoría
-o Cantidad de registros totales por fuente
-o Cantidad de registros por provincia y categoría
+-Cantidad de registros totales por categoría
+
+-Cantidad de registros totales por fuente
+
+-Cantidad de registros por provincia y categoría
 
 Puede usar lo siguiente
 
