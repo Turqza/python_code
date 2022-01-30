@@ -16,9 +16,10 @@ python data_loader.py
 
 #RESULTADOS
 
-En la seccion public de su base de datos debe crearse una tabla denominada Espacios_publicos
-la cual contendra los siguientes datos:
+En la seccion public de su base de datos debe crearse dos tablas con los siguientes datos:
 
+Tabla: Espacios_publicos
+Campos:
 -cod_localidad
 -id_provincia
 -id_departamento
@@ -31,6 +32,13 @@ la cual contendra los siguientes datos:
 -número de teléfono
 -mail
 -web
+
+Tabla: resumen_cines
+Campos: 
+-Provincia
+-Cantidad de pantallas
+-Cantidad de butacas
+-Cantidad de espacios INCAA
 
 
 #PARA OBTENER DATOS ADICIOANLES COMO ESTOS:
