@@ -24,3 +24,20 @@ TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public.espacios_publicos
     OWNER to postgres;
+
+
+CREATE TABLE IF NOT EXISTS public.resumen_cines
+(
+    id_cine integer NOT NULL DEFAULT nextval('resumen_cines_id_cine_seq'::regclass),
+    provincia character varying(50) COLLATE pg_catalog."default",
+    cantidad_pantallas integer,
+    cantidad_butacas integer,
+    cantidad_de_espacios_incaa integer,
+    created_at timestamp without time zone,
+    CONSTRAINT resumen_cines_pkey PRIMARY KEY (id_cine)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.resumen_cines
+    OWNER to postgres;
