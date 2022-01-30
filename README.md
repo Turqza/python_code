@@ -49,7 +49,7 @@ Campos:
 
 -Cantidad de registros por provincia y categoría
 
-Puede usar lo siguiente
+Puede usar las siguientes consultas
 
 select categoria, count(id_space) from espacios_publicos group by categoria
 
@@ -57,3 +57,14 @@ select fuente, count(id_space) from espacios_publicos group by fuente
 
 select provincia, count(id_space) from espacios_publicos group by provincia
 
+#PARA OBTENER DATOS RELACIONADOS A LO SIGUIENTE:
+
+-Cantidad de registros totales por categoría
+-Cantidad de registros totales por fuente
+-Cantidad de registros por provincia y categoría
+
+podemos usar las siguientes consultas
+
+select provincia, count( cantidad_pantallas ) from resumen_cines group by provincia
+select provincia, count( cantidad_butacas ) from resumen_cines group by provincia
+select provincia, count( cantidad_de_espacios_incaa ) from resumen_cines group by provincia
