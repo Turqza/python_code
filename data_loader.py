@@ -58,6 +58,7 @@ if __name__ == '__main__':
 	#Base.metadata.drop_all(engine)
 	Base.metadata.create_all(engine)
 
+# REEMPLAZA LETRAS ESPECIALES ACENTUADOS POR LETRAS NO ACENTUADAS
 def normalize(s):
     replacements = (
         ("\\xc3\\xa1", "a"),
@@ -77,14 +78,20 @@ def normalize(s):
     return s
 
 
+# ITERA LAS LINEAS DE UN ARCHIVO CSV Y LAS ESCRIBE EN LA BD
+# URL_SPACES: URL_MUSEOS, URL_CINES URL_BIBLIOTECAS
+# session: CONECCÍON A LA BD
+# record_type_name 'CINE', 'BIBLIOTECA', 'MUSEO'
 def Iiterate_Spaces(URL_SPACES, session, record_type_name):
-	#RECORRER LOS MUSEOS
+	#OBTENER EL ARCHIVO DADO EN LA URL
 	with req.get(URL_SPACES, stream=True) as rq:
 		#CONTADOR DE LINEAS
 		linenumber = 0
 		#ITERAR SOBRE CADA LINEA
 		for line in rq.iter_lines(delimiter=b'\n'):
 			
+			#LLENAMOS LOS VALORES PARA LA TABLA ESPACIOS PUBLICOS
+
 			#SI NO ES LA PRIMERA LINEA (ESTO SE USA PARA NO TOMAR EN CUENTA LA PRIMERA LINEA DEL ARCHIVO)
 			if linenumber != 0:
 				linenumber += 1
@@ -128,14 +135,13 @@ def Iiterate_Spaces(URL_SPACES, session, record_type_name):
 												fuente = normalize(list_fields[21])
 												)
 					session.add(space1)
+					
+					# ARMAR Y LLENAR LOS DATOS PARA LA TABLA RESUMEN CINES
 					cine_len = len(list_fields)
 					if record_type_name == 'CINES' and cine_len > 25:
 						index1 = cine_len-4
 						index2 = cine_len-3
 						index3 = cine_len-2
-						print('1=>' + list_fields[index1])
-						print('2=>' + list_fields[index2])
-						print('3=>' + list_fields[index3])
 						if list_fields[index1] != '':
 							cantidad_pantallas_item = list_fields[index1]
 						else:
@@ -146,7 +152,7 @@ def Iiterate_Spaces(URL_SPACES, session, record_type_name):
 						else:
 							cantidad_butacas_item = 0
 						
-						if list_fields[index3] != 'si' and list_fields[index3] != 'SI':
+						if list_fields[index3] == 'si' or list_fields[index3] == 'SI':
 							cantidad_de_espacios_incaa_item = 1
 						else :
 							cantidad_de_espacios_incaa_item = 0
@@ -167,11 +173,14 @@ Iiterate_Spaces(URL_BIBLIOTECAS, session, 'BIBLIOTECAS')
 session.commit()
 
 
-
+#Cantidad de registros totales por categoría
 #select categoria, count(id_space) from espacios_publicos group by categoria
+#Cantidad de registros totales por fuente
 #select fuente, count(id_space) from espacios_publicos group by fuente
+#Cantidad de registros por provincia 
 #select provincia, count(id_space) from espacios_publicos group by provincia
 
+#Procesar la información de cines para poder crear una tabla que contenga:
 #select provincia, count( cantidad_pantallas ) from resumen_cines group by provincia
 #select provincia, count( cantidad_butacas ) from resumen_cines group by provincia
 #select provincia, count( cantidad_de_espacios_incaa ) from resumen_cines group by provincia
